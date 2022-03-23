@@ -4,17 +4,25 @@ Jinja2 Documentation:    https://jinja.palletsprojects.com/
 Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
-
-from app import app
-from flask import render_template, request, redirect, url_for
-
-
+import os
+from crypt import methods
+from app import app,db
+from flask import render_template, request, redirect, url_for, flash,session, send_from_directory
+from werkzeug.utils import secure_filename
+from app.property import propertyForm
+from app.models import Property
 ###
 # Routing for your application.
 ###
 
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    rootdir = os.getcwd()
+    return send_from_directory(os.path.join(rootdir,app.config['UPLOAD_FOLDER']),filename)
+
 @app.route('/')
 def home():
+    
     """Render website's home page."""
     return render_template('home.html')
 
@@ -25,6 +33,40 @@ def about():
     return render_template('about.html', name="Mary Jane")
 
 
+@app.route('/properties/create',methods=['GET', 'POST'])
+def create():
+    thisForm=propertyForm()
+    if request.method=='POST':
+        if thisForm.validate_on_submit():
+            title = thisForm.title.data
+            bedrooms= thisForm.bedrooms.data
+            bathrooms= thisForm.bathrooms.data
+            location= thisForm.location.data
+            price= thisForm.price.data
+            type= thisForm.type.data
+            description= thisForm.description.data
+            photo= thisForm.photo.data
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            db.session.add(Property(title,bedrooms,bathrooms,location,price,description,type,filename))
+            db.session.commit()
+            flash('Property Added Successfully!', 'success')
+            return redirect(url_for('properties'))
+        else:
+            flash_errors(thisForm)
+    return render_template("create.html",form=thisForm)
+
+
+@app.route('/properties')
+def properties():
+    property = Property.query.all()
+    return render_template('properties.html',property=property)
+
+
+@app.route('/properties/<propertyid>')
+def showProperty(propertyid):
+    propid = Property.query.filter_by(propertyid=propertyid).first()
+    return render_template('indivual_property.html', propid=propid)
 ###
 # The functions below should be applicable to all Flask apps.
 ###

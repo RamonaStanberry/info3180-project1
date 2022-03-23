@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block main %}
+
+<h1 class="page-header">Add New Property</h1>
+<form method='POST' action="{{url_for('create')}}" enctype="multipart/form-data">
+    {{form.csrf_token}}
+        {{form.title.label}}<br>
+        {{form.title}}<br>
+
+        {{form.description.label}}<br>
+        {{form.description}}<br>
+
+    <div class="diff">
+        <div class="col1">
+            {{form.bedrooms.label}}
+            {{form.bedrooms}}
+        </div>
+        
+        <div class="col2">
+            {{form.bathrooms.label}}
+            {{form.bathrooms}}
+        </div>
+            
+        <div class="col1">
+            {{form.price.label}}
+            {{form.price}}
+        </div>
+        
+        <div class="col2">
+            {{form.type.label}}
+            {{form.type (class="custom-select mr-sm-2")}}
+        </div>
+        
+        <div class="col1">
+            {{form.location.label}}
+            {{form.location}}
+        </div>
+            
+    </div>
+
+    {{form.photo.label}}<br>
+    {{form.photo}}
+    <br><br>
+    <button class="btn" type="submit">Add Property</button>
+
+ </form> 
+
+
+{% endblock %}
